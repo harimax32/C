@@ -1,0 +1,105 @@
+#include <stdio.h>
+#include <stdlib.h>
+void init( int n ,int *tree);
+void range_increment( int i, int j, int val ,int *tree);
+int query( int i ,int *tree);
+void sort_a2(int*a,int*b,int size);
+void merge2(int*a,int*left_a,int*right_a,int*b,int*left_b,int*right_b,int left_size, int right_size);
+int N,a[1000000],sort_a[1000000],idx[1000000],left_tree[3000000],right_tree[3000000],left[1000000],right[1000000];
+
+int main(){
+  int NN,ans,x,y,i;
+  scanf("%d",&NN);
+  for(i=0;i<NN;i++){
+    scanf("%d",a+i);
+    sort_a[i]=a[i];
+    idx[i]=i+1;
+  }
+  sort_a2(sort_a,idx,NN);
+  init(NN,left_tree);
+  init(NN,right_tree);
+  for(i=0;i<NN;i++){
+    x=left[idx[i]-1]=query(idx[i]-1,left_tree);
+    y=right[idx[i]-1]=query(idx[i]-1,right_tree);
+    if(!y)
+      y=NN;
+    range_increment(idx[i],y-1,idx[i]-left[idx[i]-1],left_tree);
+    range_increment(x,idx[i]-1,idx[i]-right[idx[i]-1],right_tree);
+  }
+  for(i=ans=0;i<NN;i++){
+    if(left[i] && (a[i]^a[left[i]-1])>ans)
+      ans=(a[i]^a[left[i]-1]);
+    if(right[i] && (a[i]^a[right[i]-1])>ans)
+      ans=(a[i]^a[right[i]-1]);
+  }
+  printf("%d",ans);
+  return 0;
+}
+void init( int n ,int *tree){
+  N = 1;
+  while( N < n ) N *= 2;
+  int i;
+  for( i = 1; i < N + n; i++ ) tree[i] = 0;
+}
+void range_increment( int i, int j, int val ,int *tree){
+  for( i += N, j += N; i <= j; i = ( i + 1 ) / 2, j = ( j - 1 ) / 2 )
+  {
+    if( i % 2 == 1 ) tree[i] += val;
+    if( j % 2 == 0 ) tree[j] += val;
+  }
+}
+int query( int i ,int *tree){
+  int ans = 0,j;
+  for( j = i + N; j; j /= 2 ) ans += tree[j];
+  return ans;
+}
+void sort_a2(int*a,int*b,int size){
+  if (size < 2)
+    return;
+  int m = (size+1)/2,i;
+  int*left_a,*left_b,*right_a,*right_b;
+  left_a=(int*)malloc(m*sizeof(int));
+  right_a=(int*)malloc((size-m)*sizeof(int));
+  left_b=(int*)malloc(m*sizeof(int));
+  right_b=(int*)malloc((size-m)*sizeof(int));
+  for(i=0;i<m;i++){
+    left_a[i]=a[i];
+    left_b[i]=b[i];
+  }
+  for(i=0;i<size-m;i++){
+    right_a[i]=a[i+m];
+    right_b[i]=b[i+m];
+  }
+  sort_a2(left_a,left_b,m);
+  sort_a2(right_a,right_b,size-m);
+  merge2(a,left_a,right_a,b,left_b,right_b,m,size-m);
+  free(left_a);
+  free(right_a);
+  free(left_b);
+  free(right_b);
+  return;
+}
+void merge2(int*a,int*left_a,int*right_a,int*b,int*left_b,int*right_b,int left_size, int right_size){
+  int i = 0, j = 0;
+  while (i < left_size|| j < right_size) {
+    if (i == left_size) {
+      a[i+j] = right_a[j];
+      b[i+j] = right_b[j];
+      j++;
+    } else if (j == right_size) {
+      a[i+j] = left_a[i];
+      b[i+j] = left_b[i];
+      i++;
+    } else if (left_a[i] <= right_a[j]) {
+      a[i+j] = left_a[i];
+      b[i+j] = left_b[i];
+      i++;
+    } else {
+      a[i+j] = right_a[j];
+      b[i+j] = right_b[j];
+      j++;
+    }
+  }
+  return;
+}
+
