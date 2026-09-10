@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdbool.h>
+int getNextIndex(int* nums, int numsSize, int currentIndex, bool isForward) {
+    bool currentDirection = nums[currentIndex] >= 0;
+    if (currentDirection != isForward) {
+        return -1; 
+    }
+    int nextIndex = (currentIndex + nums[currentIndex]) % numsSize;
+    if (nextIndex < 0) {
+        nextIndex += numsSize;
+    }
+    return nextIndex;
+}
+bool circularArrayLoop(int* nums, int numsSize) {
+    if (numsSize <= 1) return false;
+     for (int i = 0; i < numsSize; i++) {
+        if (nums[i] == 0) continue;
+        int slow = i;
+        int fast = i;
+        bool isForward = nums[i] >= 0; 
+        while (1) {
+            slow = getNextIndex(nums, numsSize, slow, isForward);
+            fast = getNextIndex(nums, numsSize, fast, isForward);
+            if (fast != -1) {
+                fast = getNextIndex(nums, numsSize, fast, isForward);
+            }
+            if (slow == -1 || fast == -1) {
+                break;
+            }
+
+            if (slow == fast) {
+                if (slow == getNextIndex(nums, numsSize, slow, isForward)) {
+                    break;
+                }
+                return true;
+            }
+        }
+        int current = i;
+        while (1) {
+            int next = getNextIndex(nums, numsSize, current, isForward);
+            if (next == -1 || nums[current] == 0) {
+                break;
+            }
+            nums[current] = 0; 
+            current = next;
+        }
+    }
+    
+    return false;
+}
