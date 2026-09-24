@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <limits.h>
+
+#define ROW_SIZE 6
+#define COL_SIZE 6
+
+int hourglassSum(int arr[ROW_SIZE][COL_SIZE]) {
+   
+    int max_sum = INT_MIN; 
+
+
+    for (int r = 0; r <= 3; r++) {
+        for (int c = 0; c <= 3; c++) {
+            
+            int top = arr[r][c] + arr[r][c + 1] + arr[r][c + 2];
+            int middle = arr[r + 1][c + 1];
+            int bottom = arr[r + 2][c] + arr[r + 2][c + 1] + arr[r + 2][c + 2];
+            
+            int current_hourglass_sum = top + middle + bottom;
+
+            
+            if (current_hourglass_sum > max_sum) {
+                max_sum = current_hourglass_sum;
+            }
+        }
+    }
+
+    return max_sum;
+}
+
+int main() {
+    int arr[ROW_SIZE][COL_SIZE];
+
+    for (int i = 0; i < ROW_SIZE; i++) {
+        for (int j = 0; j < COL_SIZE; j++) {
+            if (scanf("%d", &arr[i][j]) != 1) {
+                return 0;
+            }
+        }
+    }
+
+    int result = hourglassSum(arr);
+    printf("%d\n", result);
+
+    return 0;
+}
