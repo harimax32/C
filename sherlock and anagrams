@@ -1,0 +1,101 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define HASH_SIZE 10007
+
+
+typedef struct Node {
+    char* signature;
+    int count;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* buckets[HASH_SIZE];
+} HashMap;
+
+unsigned int hash(const char* str) {
+    unsigned int h = 0;
+    while (*str) {
+        h = (h * 31) + *str;
+        str++;
+    }
+    return h % HASH_SIZE;
+}
+
+void insert_or_increment(HashMap* map, const char* sig) {
+    unsigned int idx = hash(sig);
+    Node* curr = map->buckets[idx];
+    
+    while (curr != NULL) {
+        if (strcmp(curr->signature, sig) == 0) {
+            curr->count++;
+            return;
+        }
+        curr = curr->next;
+    }
+    Node* new_node = (Node*)malloc(sizeof(Node));
+    new_node->signature = strdup(sig);
+    new_node->count = 1;
+    new_node->next = map->buckets[idx];
+    map->buckets[idx] = new_node;
+}
+int compare_chars(const void* a, const void* b) {
+    return (*(char*)a - *(char*)b);
+}
+
+int calculate_pairs_and_free(HashMap* map) {
+    int total_pairs = 0;
+    for (int i = 0; i < HASH_SIZE; i++) {
+        Node* curr = map->buckets[i];
+        while (curr != NULL) {
+            if (curr->count > 1) {
+               
+                total_pairs += (curr->count * (curr->count - 1)) / 2;
+            }
+            Node* temp = curr;
+            curr = curr->next;
+            free(temp->signature);
+            free(temp);
+        }
+        map->buckets[i] = NULL;
+    }
+    return total_pairs;
+}
+
+int sherlockAndAnagrams(char* s) {
+    int len = strlen(s);
+    HashMap map = { {NULL} };
+    char sub[105]; 
+
+    for (int i = 0; i < len; i++) {
+        for (int sub_len = 1; i + sub_len <= len; sub_len++) {
+        
+            strncpy(sub, s + i, sub_len);
+            sub[sub_len] = '\0';
+            
+          
+            qsort(sub, sub_len, sizeof(char), compare_chars);
+            
+            
+            insert_or_increment(&map, sub);
+        }
+    }
+
+
+    return calculate_pairs_and_free(&map);
+}
+
+int main() {
+    int q;
+    if (scanf("%d", &q) != 1) return 0;
+    
+    char s[105];
+    for (int i = 0; i < q; i++) {
+        if (scanf("%s", s) != 1) break;
+        printf("%d\n", sherlockAndAnagrams(s));
+    }
+    
+    return 0;
+}
