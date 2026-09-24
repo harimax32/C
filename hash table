@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int compareStrings(const void* a, const void* b) {
+    return strcmp(*(const char**)a, *(const char**)b);
+}
+
+void checkMagazine(char** magazine, int magazine_count, char** note, int note_count) {
+    if (note_count > magazine_count) {
+        printf("No\n");
+        return;
+    }
+
+    qsort(magazine, magazine_count, sizeof(char*), compareStrings);
+    qsort(note, note_count, sizeof(char*), compareStrings);
+
+    int mag_ptr = 0;
+    int note_ptr = 0;
+
+    while (mag_ptr < magazine_count && note_ptr < note_count) {
+        int cmp = strcmp(magazine[mag_ptr], note[note_ptr]);
+
+        if (cmp == 0) {
+            mag_ptr++;
+            note_ptr++;
+        } else if (cmp < 0) {
+            mag_ptr++;
+        } else {
+            printf("No\n");
+            return;
+        }
+    }
+
+    if (note_ptr == note_count) {
+        printf("Yes\n");
+    } else {
+        printf("No\n");
+    }
+}
+
+
+int main() {
+    int m, n;
+    if (scanf("%d %d", &m, &n) != 2) return 0;
+
+
+    char** magazine = (char**)malloc(m * sizeof(char*));
+    char** note = (char**)malloc(n * sizeof(char*));
+
+    for (int i = 0; i < m; i++) {
+        magazine[i] = (char*)malloc(101 * sizeof(char)); // Constraint: max length 100
+        scanf("%s", magazine[i]);
+    }
+
+
+    for (int i = 0; i < n; i++) {
+        note[i] = (char*)malloc(101 * sizeof(char));
+        scanf("%s", note[i]);
+    }
+
+    checkMagazine(magazine, m, note, n);
+
+    for (int i = 0; i < m; i++) free(magazine[i]);
+    for (int i = 0; i < n; i++) free(note[i]);
+    free(magazine);
+    free(note);
+
+    return 0;
+}
